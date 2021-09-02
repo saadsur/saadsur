@@ -1,0 +1,57 @@
+PPG= load('419_3.txt'); % read comma separated data
+PPG = PPG';
+PPG = PPG*0.0008056;
+x= linspace(0,2.1,2100);
+plot(x,PPG)
+%%area(PPG)
+m = mean(PPG);
+st = std(PPG);
+PPG_norm = (PPG - m)/st;
+hold on;
+plot(x,PPG_norm,"Color",'r')
+hold off;
+
+% Smooth input data
+smoothedData = smoothdata(PPG_norm,"loess","SmoothingFactor",0.25);
+
+% Display results
+clf
+plot(PPG_norm,"Color",[77 190 238]/255,"DisplayName","Input data")
+hold on
+plot(smoothedData,"Color",[0 114 189]/255,"LineWidth",1.5,...
+    "DisplayName","Smoothed data")
+hold off
+legend
+
+% Find local maxima and minima
+maxIndices = islocalmax(smoothedData,"SamplePoints",x);
+minIndices = islocalmin(smoothedData,"SamplePoints",x);
+
+% Display results
+clf
+plot(x,smoothedData,"Color",[77 190 238]/255,"DisplayName","Input data")
+hold on
+
+% Plot local maxima
+plot(x(maxIndices),smoothedData(maxIndices),"^","Color",[217 83 25]/255,...
+    "MarkerFaceColor",[217 83 25]/255,"DisplayName","Local maxima")
+
+% Plot local minima
+plot(x(minIndices),smoothedData(minIndices),"v","Color",[237 177 32]/255,...
+    "MarkerFaceColor",[237 177 32]/255,"DisplayName","Local minima")
+title("Number of extrema: " + (nnz(maxIndices)+nnz(minIndices)))
+hold off
+legend
+xlabel("x")
+%area(smoothedData)
+% finding time interval between two peaks
+ind = x(maxIndices);
+len = length(ind);
+ptp = ind(2:len);
+ptp(len)=ptp(len-1);
+ptp = ptp - ind
+periodogram(smoothedData);
+%plot(pxx)
+pspectrum(smoothedData)
+
+
